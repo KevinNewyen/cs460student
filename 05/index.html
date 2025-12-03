@@ -1,0 +1,232 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title> CS460 </title>
+
+        <style>
+            html, body {
+                background: #000000;
+                color: white;
+                margin: 0; 
+                padding: 0;
+                height: 100%;
+                overflow: hidden;
+            }
+        </style>
+
+        <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+
+        <script type="importmap"> 
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@latest/build/three.module.js",
+                    "three/addons/": "https://unpkg.com/three@latest/examples/jsm/"
+                }
+            }
+        </script>
+
+        <script src="https://mrdoob.github.io/stats.js/build/stats.min.js"></script>
+
+    </head>
+
+    <body>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { AnaglyphEffect } from 'three/addons/effects/AnaglyphEffect.js';
+        import { Pane } from 'https://cdn.jsdelivr.net/npm/tweakpane@4.0.5/dist/tweakpane.min.js';
+        import { VertexNormalsHelper } from 'three/addons/helpers/VertexNormalsHelper.js';
+        var scene, camera, renderer, controls, anaglyph, loader, pane, stats;
+
+        window.onload = function() {
+
+            scene = new THREE.Scene();
+
+            var fov = 75;
+            var ratio = window.innerWidth / window.innerHeight;
+            var zNear = 1;
+            var zFar = 10000;
+
+            camera = new THREE.PerspectiveCamera(fov, ratio, zNear, zFar);
+            camera.position.set(-5, 5, 10);
+
+            renderer = new THREE.WebGLRenderer({antialias: true});
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+
+            var ambientLight = new THREE.AmbientLight();
+            scene.add(ambientLight);
+    
+            var directionalLight = new THREE.DirectionalLight(0xffffff, 5);
+            directionalLight.position.set(10, 100, 10);
+            scene.add(directionalLight);
+
+            anaglyph = new AnaglyphEffect(renderer);
+            anaglyph.setSize( window.innerWidth, window.innerHeight );
+
+            loader = new GLTFLoader();
+            loader.load( 'poly.glb', function ( gltf ) {
+
+                var poly = gltf.scenes[0].children[0];
+
+                poly.scale.x = 10;
+                poly.scale.y = 10;
+                poly.scale.z = 10;
+            
+                poly.quaternion.w = 1;
+                poly.quaternion.x = 0;
+                poly.quaternion.y = 0;
+                poly.quaternion.z = 0;
+
+                poly.position.set (10, -10, 0);
+
+                poly.translateX(5);
+
+                window.SCENE.poly = poly;
+
+                var polyui = pane.addFolder({title: 'PolyCam Mesh'});
+                polyui.addBinding(window.SCENE.poly.material, 'wireframe');
+
+                polyui.addButton({title:'rotate!'}).on('click', () => {
+                    window.SCENE.do_rotate_poly();
+                });
+
+                scene.add(gltf.scene);
+            } );
+
+            loader.load( 'kirby.glb', function ( gltf ) {
+
+                var blender = gltf.scenes[0].children[0];
+
+                blender.scale.x = 10;
+                blender.scale.y = 10;
+                blender.scale.z = 10;
+
+                blender.quaternion.w = 1;
+                blender.quaternion.x = 0;
+                blender.quaternion.y = 0;
+                blender.quaternion.z = 0;
+
+                blender.position.set (-5, -10, -5);
+
+                blender.translateX(-5);
+
+                window.SCENE.blender = blender;
+
+                var helper = new VertexNormalsHelper( blender, 0.1, 'blue' );
+                helper.visible = false;
+                scene.add(helper);
+
+                window.SCENE.blender_helper = helper;
+
+                var blenderui = pane.addFolder({title: 'Blender Mesh'});
+                blenderui.addBinding(helper, 'visible', {label:'Show normals!'});
+
+                blenderui.addButton({title:'Change Material'}).on('click', () => {
+                    window.SCENE.change_material();
+                });
+
+                blenderui.addButton({title:'rotate!'}).on('click', () => {
+                    window.SCENE.do_rotate_blender();
+                });
+
+                scene.add( gltf.scene );
+            } );
+
+            pane = new Pane();
+            var sceneui = pane.addFolder({title: 'Scene'});
+
+            window['SCENE'] = {
+
+                'anaglyph': false,
+
+                'poly': null,
+                'rotate_poly': false,
+                'do_rotate_poly': function() {
+                    window['SCENE']['rotate_poly'] = !window['SCENE']['rotate_poly'];
+                },
+
+                'rotate_blender': false,
+                'do_rotate_blender': function() {
+                    window['SCENE']['rotate_blender'] = !window['SCENE']['rotate_blender'];
+                },
+
+                'blender': null,
+                'blender_helper': null,
+                'blender_old_material': null,
+                'change_material': function() {
+                    if (!window['SCENE']['blender_old_material']) {
+                        window['SCENE']['blender_old_material'] = window['SCENE']['blender'].material.clone();
+                        window['SCENE']['blender'].material = new THREE.MeshNormalMaterial();
+                    } else {
+                        window['SCENE']['blender'].material = window['SCENE']['blender_old_material'].clone();
+                        window['SCENE']['blender_old_material'] = null;
+                    }
+                }
+            }
+
+            sceneui.addBinding(window.SCENE, 'anaglyph', {label: 'Anaglyph'});
+
+
+            sceneui.addBinding(directionalLight.position, 'x', {min:-100, max:100, label:'Light X'});
+            sceneui.addBinding(directionalLight.position, 'y', {min:-100, max:100, label:'Light Y'});
+            sceneui.addBinding(directionalLight.position, 'z', {min:-100, max:100, label:'Light Z'});
+
+            sceneui.addBinding(directionalLight, 'intensity', {min:0, max:10, label:'Intensity'});
+
+            sceneui.addBinding(ambientLight, 'color', {label:'AmbientLight Color'});
+            
+
+
+            animate();
+
+        };
+
+        stats = new Stats();
+        document.body.appendChild( stats.domElement );
+
+        function animate() {
+
+            requestAnimationFrame( animate );
+
+            controls.update();
+
+            var q_poly = new THREE.Quaternion();
+            if (window.SCENE.poly) {
+                if (window.SCENE.rotate_poly) {
+                    q_poly.setFromAxisAngle(new THREE.Vector3(0,1,0), Math.PI);
+
+                } else {
+                    q_poly.identity();
+                }
+                window.SCENE.poly.quaternion.slerp( q_poly, 0.01 );
+            }
+            var q_blender = new THREE.Quaternion();
+            if (window.SCENE.blender) {
+                if (window.SCENE.rotate_blender) {
+                    q_blender.setFromAxisAngle(new THREE.Vector3(0,1,0), Math.PI);
+                } else {
+                    q_blender.identity();
+                } 
+                window.SCENE.blender.quaternion.slerp( q_blender, 0.01 );
+
+                if (window.SCENE.blender_helper) {
+                    window.SCENE.blender_helper.update();
+                }
+            }
+
+            if (window.SCENE.anaglyph) {
+                anaglyph.render( scene, camera );
+            } else {
+                renderer.render( scene, camera );
+            }
+
+            stats.update();
+
+        }
+    </script>
+    </body>
+</html>
