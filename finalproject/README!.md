@@ -9,4 +9,5 @@ Usage:
 WASD to move and mouse to look around
 
 Acknowledgement:
-Created in CS460, thank you to the professor and the TA for this project makings.
+Created in CS460, thank you to the professor and the TA for this project makings. As well as thanking Sketchfab for some of the assets. 
+
