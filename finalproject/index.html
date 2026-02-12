@@ -54,6 +54,9 @@
       import * as THREE from 'three';
       import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
       import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+      import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+      import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+
 
       let camera, scene, renderer, controls;
       let moveForward = false,
@@ -77,6 +80,8 @@
         [0xff0000, 0x00ff00, 0xffd700, 0xffa500, 0xffffff],
         [0x00008b, 0x4b0082, 0xc0c0c0, 0xffffff]
       ];
+      const lanterns = [];
+
 
       const mixers = [];
 
@@ -174,6 +179,12 @@
               lantern.rotation.y = Math.random() * Math.PI * 2;
               lantern.updateMatrixWorld(true);
               scene.add(lantern);
+              
+              lantern.userData.baseX = lantern.position.x;
+              lantern.userData.baseY = lantern.position.y;
+              lantern.userData.baseZ = lantern.position.z;
+              lantern.userData.offset = Math.random() * 1000;
+              lanterns.push(lantern);
 
               lantern.traverse((child) => {
                 if (child.isMesh) {
@@ -192,30 +203,33 @@
           }
         );
 
-
-        const lionLoader = new GLTFLoader();
-        lionLoader.load(
-          'lion.glb',
+        const dragonLoader = new GLTFLoader();
+        dragonLoader.load(
+          'dragon.glb',
           (gltf) => {
-            const lionModel = gltf.scene;
-            lionModel.scale.set(300, 300, 300);
-            lionModel.position.set(-150, 35, -65);
-            lionModel.rotation.y = 360;
-            scene.add(lionModel);
-            const mixer = new THREE.AnimationMixer(lionModel);
-            const clip = THREE.AnimationClip.findByName(gltf.animations, 'Take 001');
-            if (clip) {
-              const action = mixer.clipAction(clip);
-              action.loop = THREE.LoopRepeat;
-              action.play();
-            }
-            mixers.push(mixer);
+            const dragon = gltf.scene;
+            dragon.scale.set(3, 3, 3);
+            dragon.position.set(-100, 35, -50);
+            dragon.rotation.y = Math.PI * 0.75;
+            scene.add(dragon);
+            dragon.updateMatrixWorld(true);
+            dragon.traverse((child) => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                const box = new THREE.Box3().setFromObject(child);
+                glbColliders.push(box);
+                festivalMeshes.push(child);
+              }
+            });
           },
           undefined,
           (error) => {
-            console.error('An error occurred loading lion.glb:', error);
+            console.error('An error occurred loading dragon.glb:', error);
           }
         );
+
+        const lionLoader = new GLTFLoader();
         lionLoader.load(
           'lion.glb',
           (gltf) => {
@@ -238,6 +252,225 @@
             console.error('An error occurred loading lion.glb:', error);
           }
         );
+        const horseLoader = new GLTFLoader();
+        horseLoader.load(
+          'horse.glb',
+          (gltf) => {
+            const horse = gltf.scene;
+            horse.scale.set(1, 1, 1);
+            horse.position.set(25, 8, 0);
+            horse.rotation.y = Math.PI;
+            scene.add(horse);
+            horse.updateMatrixWorld(true);
+            horse.traverse((child) => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                const box = new THREE.Box3().setFromObject(child);
+                glbColliders.push(box);
+                festivalMeshes.push(child);
+              }
+            });
+          },
+          undefined,
+          (error) => {
+            console.error('An error occurred loading horse.glb:', error);
+          }
+        );
+
+        horseLoader.load(
+          'horse2.glb',
+          (gltf) => {
+            const horse = gltf.scene;
+            horse.scale.set(150, 150, 150);
+            horse.position.set(-140, 35, -50);
+            horse.rotation.y = Math.PI;
+            scene.add(horse);
+            horse.updateMatrixWorld(true);
+            horse.traverse((child) => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                const box = new THREE.Box3().setFromObject(child);
+                glbColliders.push(box);
+                festivalMeshes.push(child);
+              }
+            });
+          },
+          undefined,
+          (error) => {
+            console.error('An error occurred loading horse.glb:', error);
+          }
+        );
+        const drumLoader = new GLTFLoader();
+        drumLoader.load(
+          'drum.glb',
+          (gltf) => {
+            const drum = gltf.scene;
+            drum.scale.set(4, 4, 4);
+            drum.position.set(-120, 37, -88);
+            drum.rotation.y = Math.PI;
+            scene.add(drum);
+            drum.updateMatrixWorld(true);
+            drum.traverse((child) => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                const box = new THREE.Box3().setFromObject(child);
+                glbColliders.push(box);
+                festivalMeshes.push(child);
+              }
+            });
+          },
+          undefined,
+          (error) => {
+            console.error('An error occurred loading drum.glb:', error);
+          }
+        );
+
+        drumLoader.load(
+          'drum.glb',
+          (gltf) => {
+            const drum = gltf.scene;
+            drum.scale.set(4, 4, 4);
+            drum.position.set(-109, 37, -80);
+            drum.rotation.y = Math.PI;
+            scene.add(drum);
+            drum.updateMatrixWorld(true);
+            drum.traverse((child) => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                const box = new THREE.Box3().setFromObject(child);
+                glbColliders.push(box);
+                festivalMeshes.push(child);
+              }
+            });
+          },
+          undefined,
+          (error) => {
+            console.error('An error occurred loading drum.glb:', error);
+          }
+        );
+
+        drumLoader.load(
+          'drum.glb',
+          (gltf) => {
+            const drum = gltf.scene;
+            drum.scale.set(4, 4, 4);
+            drum.position.set(-95, 37, -70);
+            drum.rotation.y = Math.PI;
+            scene.add(drum);
+            drum.updateMatrixWorld(true);
+            drum.traverse((child) => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                const box = new THREE.Box3().setFromObject(child);
+                glbColliders.push(box);
+                festivalMeshes.push(child);
+              }
+            });
+          },
+          undefined,
+          (error) => {
+            console.error('An error occurred loading drum.glb:', error);
+          }
+        );
+
+        const envelopeLoader = new GLTFLoader();
+        envelopeLoader.load(
+          'envelope.glb',
+          (gltf) => {
+            const baseEnvelope = gltf.scene;
+            baseEnvelope.scale.set(100, 100, 100);
+
+            const ENVELOPE_COUNT = 35;
+
+            for (let i = 0; i < ENVELOPE_COUNT; i++) {
+              const envelope = baseEnvelope.clone(true);
+
+              envelope.position.set(
+                (Math.random() - 0.5) * 120,
+                0,
+                (Math.random() - 0.5) * 120
+              );
+
+              envelope.rotation.y = Math.random() * Math.PI * 2;
+
+              scene.add(envelope);
+              envelope.updateMatrixWorld(true);
+
+              envelope.traverse((child) => {
+                if (child.isMesh) {
+                  child.castShadow = true;
+                  child.receiveShadow = true;
+                  const box = new THREE.Box3().setFromObject(child);
+                  glbColliders.push(box);
+                  festivalMeshes.push(child);
+                }
+              });
+            }
+          },
+          undefined,
+          (error) => {
+            console.error('An error occurred loading envelope.glb:', error);
+          }
+        );
+
+
+        const fireworkBoxLoader = new GLTFLoader();
+        fireworkBoxLoader.load(
+          'fireworkbox.glb',
+          (gltf) => {
+            const fireworkBox = gltf.scene;
+            fireworkBox.scale.set(5, 5, 5);
+            fireworkBox.position.set(60, 0, 25);
+            fireworkBox.rotation.y = Math.PI * 1.2;
+            scene.add(fireworkBox);
+            fireworkBox.updateMatrixWorld(true);
+            fireworkBox.traverse((child) => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                const box = new THREE.Box3().setFromObject(child);
+                glbColliders.push(box);
+                festivalMeshes.push(child);
+              }
+            });
+          },
+          undefined,
+          (error) => {
+            console.error('An error occurred loading fireworkbox.glb:', error);
+          }
+        );
+
+        fireworkBoxLoader.load(
+          'fireworkbox.glb',
+          (gltf) => {
+            const fireworkBox = gltf.scene;
+            fireworkBox.scale.set(5, 5, 5);
+            fireworkBox.position.set(50, 0, -25);
+            fireworkBox.rotation.y = Math.PI * 1.7;
+            scene.add(fireworkBox);
+            fireworkBox.updateMatrixWorld(true);
+            fireworkBox.traverse((child) => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                const box = new THREE.Box3().setFromObject(child);
+                glbColliders.push(box);
+                festivalMeshes.push(child);
+              }
+            });
+          },
+          undefined,
+          (error) => {
+            console.error('An error occurred loading fireworkbox.glb:', error);
+          }
+        );
+
+
         const fireworkLoader = new GLTFLoader();
         fireworkLoader.load(
           'firework.glb',
@@ -281,6 +514,97 @@
             console.error('An error occurred loading firework.glb:', error);
           }
         );
+        function explodeText(message = "Moonlit Festival") {
+          const canvas = document.createElement("canvas");
+          const size = 1024;
+          canvas.width = size;
+          canvas.height = size / 2;
+
+          const ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          ctx.fillStyle = "white";
+          ctx.font = "bold 70px sans-serif";
+
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+          const positions = [];
+          const velocities = [];
+
+          for (let y = 0; y < canvas.height; y += 4) {
+            for (let x = 0; x < canvas.width; x += 4) {
+              const i = (y * canvas.width + x) * 4;
+              if (imageData[i + 3] > 128) {
+                const px = x - canvas.width / 2;
+                const py = canvas.height / 2 - y;
+
+                positions.push(px, py, 0);
+
+                
+                const dir = new THREE.Vector3(px, py, 0).normalize();
+                dir.multiplyScalar(Math.random() * 2 + 0.5);
+
+                velocities.push(dir.x, dir.y, dir.z);
+              }
+            }
+          }
+
+          const geometry = new THREE.BufferGeometry();
+          geometry.setAttribute(
+            "position",
+            new THREE.Float32BufferAttribute(positions, 3)
+          );
+
+          const material = new THREE.PointsMaterial({
+            color: 0xffd700,
+            size: 2,
+            transparent: true,
+            opacity: 1,
+          });
+
+          const points = new THREE.Points(geometry, material);
+          points.position.set(200, 250, -60);
+          points.rotation.y = Math.PI * 1.5;
+          scene.add(points);
+
+
+          let life = 1.0;
+
+          function update() {
+            const pos = geometry.attributes.position;
+
+            for (let i = 0; i < pos.count; i++) {
+              pos.setX(i, pos.getX(i) + velocities[i * 3]);
+              pos.setY(i, pos.getY(i) + velocities[i * 3 + 1]);
+              pos.setZ(i, pos.getZ(i) + velocities[i * 3 + 2]);
+            }
+
+            pos.needsUpdate = true;
+
+            life -= 0.01;
+            material.opacity = life;
+
+            if (life > 0) {
+              requestAnimationFrame(update);
+            } else {
+              scene.remove(points);
+              geometry.dispose();
+              material.dispose();
+            }
+          }
+
+          setTimeout(() => {
+            update();
+          }, 13000);
+        }
+
+        explodeText("Moonlit Festival");
+
+
       }
       function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -403,6 +727,16 @@
         mixers.forEach((mixer) => mixer.update(delta));
 
         prevTime = time;
+        const t = performance.now() * 0.001;
+
+        lanterns.forEach((lantern) => {
+          const o = lantern.userData.offset;
+
+          lantern.position.y = lantern.userData.baseY + Math.sin(t + o) * 2;
+          lantern.position.x = lantern.userData.baseX + Math.sin(t * 0.5 + o) * 3;
+          lantern.position.z = lantern.userData.baseZ + Math.cos(t * 0.5 + o) * 3;
+        });
+
         renderer.render(scene, camera);
       }
     </script>
